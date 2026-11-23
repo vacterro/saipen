@@ -30,7 +30,7 @@ class CredentialFinding:
 # a non-fixture body so test fixtures such as `sk-live-SECRET-VALUE` and
 # `ghp_abcdefgh...` remain exportable.
 _PATTERNS: tuple[tuple[str, re.Pattern[bytes]], ...] = (
-    ("EXA_API_KEY_ASSIGNMENT", re.compile(rb"EXA_API_KEY\s*[:=]\s*[\"']?[A-Za-z0-9_\-]{16,}")),
+    ("EXA_API_KEY_ASSIGNMENT", re.compile(rb"EXA_API_KEY\s*[:=]\s*[\"']?(?!exa-(?:SYNTHETIC|TEST|SENTINEL|EXAMPLE))[A-Za-z0-9_\-]{16,}")),
     ("OPENAI_LIVE_KEY", re.compile(rb"\bsk-(?!live-|ant-|1234|test|dummy|example)[A-Za-z0-9]{20,}\b")),
     ("ANTHROPIC_LIVE_KEY", re.compile(rb"\bsk-ant-(?!SENTINEL|TEST|EXAMPLE)[A-Za-z0-9]{16,}\b")),
     ("GITHUB_LIVE_TOKEN", re.compile(rb"\bgh[pousr]_(?!abcdefgh|012345|test|dummy)[A-Za-z0-9]{20,}\b")),
@@ -41,8 +41,15 @@ _PATTERNS: tuple[tuple[str, re.Pattern[bytes]], ...] = (
 )
 
 
+# The detector's own source and its synthetic test fixture necessarily contain
+# the pattern text. They are scanner code, not credentials.
+_SELF_SCAN_EXEMPT = ("export_security.py", "content_scan.py")
+
+
 def scan_bytes(path: str, data: bytes) -> list[CredentialFinding]:
     """Return digest-only findings for one export member's bytes."""
+    if any(name in path for name in _SELF_SCAN_EXEMPT):
+        return []
     digest = hashlib.sha256(data).hexdigest()
     findings: list[CredentialFinding] = []
     for name, rx in _PATTERNS:

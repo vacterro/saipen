@@ -17,7 +17,7 @@ from saipen_engine.export_security import scan_bytes
 class AudapackContentGateTests(unittest.TestCase):
     # Synthetic values. No real credential is read or emitted by this test.
     LIVE_BODIES = (
-        ("leak.env", b"EXA_API_KEY=exa-SYNTHETIC-LIVE-VALUE-0123456789abcdef\n"),
+        ("leak.env", b"EXA_API_KEY=exa-FaKeL1v3Value0123456789abcdefXYZ\n"),
         ("openai.json", b'{"api_key": "sk-REALSHAPEabcdefghijklmnopqrstuvwxyz"}\n'),
         ("github.txt", b"token = ghp_aBcDeF1234567890gHjKlMnOpQrStUvWxYz01\n"),
         ("aws.json", b"AWS_ACCESS_KEY_ID=AKIAIOSFODNN7SYNTHETIC\n"),
@@ -60,11 +60,11 @@ class AudapackContentGateTests(unittest.TestCase):
                 self.assertEqual(scan_bytes("fixture.py", body), [])
 
     def test_findings_never_contain_the_secret_value(self):
-        secret = b"EXA_API_KEY=exa-SYNTHETIC-SUPER-SECRET-VALUE-123456\n"
+        secret = b"EXA_API_KEY=exa-SUPERSECRETVALUE0123456789abcdef\n"
         findings = scan_bytes("leak.env", secret)
         self.assertTrue(findings)
         for finding in findings:
-            self.assertNotIn("exa-SYNTHETIC-SUPER-SECRET", finding.diagnostic())
+            self.assertNotIn("SUPERSECRETVALUE", finding.diagnostic())
 
 
 if __name__ == "__main__":
