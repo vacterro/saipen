@@ -34,6 +34,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from saipen_engine.distribution import is_non_exportable_path
+from saipen_engine.export_security import scan_export_members
 from saipen_engine.journal import RESOLUTION_CLASSES
 
 
@@ -255,6 +256,22 @@ def build_archive(output: Path, project: Path) -> None:
     tracked = _delivery_inventory(project)
     members = sorted(rel for rel in tracked if _is_delivery_source(project, rel))
     print(f"  {len(members)} tracked files selected for archive")
+
+    # HANDOFF 2026-11-23: path-based exclusion alone let four kitchen env
+    # exports (with plaintext credentials) into the archive. Scan the BYTES of
+    # every selected member too. Findings are digest-only; values never print.
+    print("\n=== Content-based credential gate ===")
+    cred_findings = scan_export_members(project, members)
+    if cred_findings:
+        print(
+            f"FAIL: {len(cred_findings)} live credential pattern(s) in export "
+            "members -- BLOCKED:"
+        )
+        for finding in cred_findings[:20]:
+            print(f"  {finding.diagnostic()}")
+        print("No credential values are printed. Rotate/revoke before retry.")
+        sys.exit(1)
+    print(f"  PASS: no live credential patterns in {len(members)} members")
 
     # T-1015: lstat every selected member and prove it is a regular file with
     # NO symlink/reparse ancestor. `is_file()` follows links, so a tracked
